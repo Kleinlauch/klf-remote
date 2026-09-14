@@ -71,10 +71,12 @@
             ws.onopen = async () => {
                 updateStatus("Verbunden. Starte WebRTC...");
                 
-                // Kostenlose Google STUN Server verwenden
                 pc = new RTCPeerConnection({
                     iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
                 });
+
+                // Fehlerbehebung: Explizit nach einem Video-Track fragen, bevor das Offer erstellt wird
+                pc.addTransceiver('video', { direction: 'recvonly' });
 
                 // DataChannel fuer Maus und Tastatur erstellen
                 dataChannel = pc.createDataChannel('control');
@@ -123,7 +125,6 @@
             video.addEventListener('mousemove', (e) => {
                 if (dataChannel && dataChannel.readyState === 'open') {
                     const rect = video.getBoundingClientRect();
-                    // Berechnung der relativen Koordinaten (0.0 bis 1.0)
                     const x = (e.clientX - rect.left) / rect.width;
                     const y = (e.clientY - rect.top) / rect.height;
                     
@@ -152,7 +153,6 @@
             });
         }
 
-        // Starten
         initConnection();
     </script>
 </body>
