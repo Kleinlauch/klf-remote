@@ -2,149 +2,98 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Web Desktop</title>
     <style>
-        body {
-            margin: 0; padding: 0;
-            background: linear-gradient(135deg, #aed1f4 0%, #d4e8f9 50%, #b2d5a3 100%);
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            color: #333; height: 100vh; overflow: hidden;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .aero-container {
-            background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.8);
-            border-radius: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 0 10px rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(10px); padding: 40px; text-align: center;
-            width: 90%; max-width: 800px;
-        }
+        body { margin: 0; padding: 0; background: linear-gradient(135deg, #aed1f4 0%, #d4e8f9 50%, #b2d5a3 100%); font-family: 'Segoe UI', Tahoma, sans-serif; color: #333; height: 100vh; overflow: hidden; display: flex; justify-content: center; align-items: center; overscroll-behavior: none; }
+        .aero-container { background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 0 10px rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); padding: 40px; text-align: center; width: 90%; max-width: 800px; }
         h1 { color: #0d4b75; text-shadow: 1px 1px 3px rgba(255,255,255,0.8); margin-bottom: 30px; }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-        }
-
-        .aero-btn {
-            background: linear-gradient(to bottom, rgba(255,255,255,0.9) 0%, rgba(220,235,250,0.8) 50%, rgba(190,215,240,0.8) 51%, rgba(200,225,245,0.9) 100%);
-            border: 1px solid #8ca6c2; border-radius: 10px; padding: 15px;
-            cursor: pointer; text-decoration: none; color: #1a4a6b; font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.9);
-            transition: all 0.2s; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100px;
-        }
-        .aero-btn:hover:not(.disabled) {
-            transform: translateY(-2px); border-color: #5a8ab8;
-        }
-        .aero-btn svg { margin-bottom: 10px; width: 36px; height: 36px; fill: #1a4a6b; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; }
+        .aero-btn { background: linear-gradient(to bottom, rgba(255,255,255,0.9) 0%, rgba(220,235,250,0.8) 50%, rgba(190,215,240,0.8) 51%, rgba(200,225,245,0.9) 100%); border: 1px solid #8ca6c2; border-radius: 10px; padding: 15px; cursor: pointer; text-decoration: none; color: #1a4a6b; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.9); transition: all 0.2s; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100px; user-select: none; }
+        .aero-btn:hover:not(.disabled) { transform: translateY(-2px); border-color: #5a8ab8; }
         .aero-btn.disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(100%); }
-
         #startPage, #remotePage { display: none; }
         #startPage.active, #remotePage.active { display: block; }
 
-        /* Win7 PIN */
-        #pinModalOverlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4); display: none; justify-content: center; align-items: center; z-index: 9999;
-        }
+        #pinModalOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); display: none; justify-content: center; align-items: center; z-index: 9999; }
         .win7-dialog { width: 380px; background: rgba(220, 230, 240, 0.85); border: 1px solid rgba(255,255,255,0.6); border-radius: 8px; padding: 6px; box-shadow: 0 0 15px rgba(0,0,0,0.6); backdrop-filter: blur(10px); }
         .win7-titlebar { background: linear-gradient(to bottom, #e4effb 0%, #b5cce6 50%, #9cbbe0 51%, #aed1f4 100%); padding: 6px 10px; border-radius: 5px 5px 0 0; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.7); }
-        .win7-title { font-size: 12px; }
         .win7-close { background: linear-gradient(to bottom, #e0a3a3 0%, #c43838 50%, #a01010 51%, #d94a4a 100%); border: 1px solid #7c1a1a; border-radius: 3px; width: 38px; height: 18px; cursor: pointer; }
         .win7-content { background: #f0f0f0; border: 1px solid #999; margin-top: 2px; padding: 20px; font-size: 12px; text-align: left; }
         .win7-input { width: 100%; padding: 4px; border: 1px solid #abadb3; margin-top: 10px; box-sizing: border-box;}
         .win7-btn { background: linear-gradient(to bottom, #f2f2f2 0%, #ebebeb 50%, #dddddd 51%, #cfcfcf 100%); border: 1px solid #707070; border-radius: 3px; padding: 4px 20px; cursor: pointer; margin-top: 15px; width: 100%;}
 
-        /* Ladescreen */
-        #loadingOverlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 9998; color: #fff;
-        }
-        .loader { border: 6px solid rgba(255,255,255,0.2); border-top: 6px solid #4a90e2; border-radius: 50%; width: 50px; height: 50px; animation: spin 0.8s linear infinite; margin-bottom: 20px; }
+        #loadingOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; flex-direction: column; justify-content: space-between; align-items: center; z-index: 9998; color: #fff; padding: 10vh 0; box-sizing: border-box;}
+        .clock-container { text-align: center; }
+        .flip-clock { font-size: 60px; font-family: monospace; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 10px rgba(74, 144, 226, 0.8); }
+        .flip-date { font-size: 20px; color: #aaa; margin-top: 10px; }
+        .loading-middle { text-align: center; max-width: 600px; padding: 0 20px; }
+        #cycleText { font-size: 24px; font-weight: bold; margin-bottom: 20px; height: 30px; color: #4a90e2; }
+        #factText { font-size: 16px; color: #ddd; font-style: italic; line-height: 1.4; }
+        .loading-bottom { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .loader { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #4a90e2; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        .progress-container { width: 200px; height: 10px; background: #333; border-radius: 5px; overflow: hidden; margin-bottom: 30px;}
-        .progress-bar { width: 0%; height: 100%; background: #4a90e2; transition: width 0.3s; }
-        
-        .cancel-btn { background: #c43838; border: none; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .progress-container { width: 300px; height: 8px; background: #222; border-radius: 4px; overflow: hidden; margin-bottom: 20px;}
+        .progress-bar { width: 0%; height: 100%; background: #4a90e2; transition: width 0.4s ease-out; }
+        .cancel-btn { background: #333; border: 1px solid #555; color: white; padding: 8px 30px; border-radius: 20px; cursor: pointer; transition: 0.2s; }
+        .cancel-btn:hover { background: #c43838; border-color: #f00; }
 
-        /* Video / Remote */
-        #videoContainer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; display: none; justify-content: center; align-items: center;
-        }
+        /* Video Mode */
+        #videoContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; justify-content: center; align-items: center; }
         video { width: 100%; height: 100%; object-fit: contain; cursor: crosshair; }
-
-        /* Leisten als Overlay */
-        .bar {
-            position: absolute; left: 0; width: 100%; height: 60px;
-            background: linear-gradient(to bottom, rgba(40,40,40,0.95), rgba(10,10,10,0.95));
-            color: white; display: flex; align-items: center; padding: 0 15px; box-sizing: border-box;
-            z-index: 100; transform: translateY(-100%); transition: transform 0.3s ease;
-        }
+        .bar { position: absolute; left: 0; width: 100%; height: 60px; background: linear-gradient(to bottom, rgba(40,40,40,0.95), rgba(10,10,10,0.95)); color: white; display: flex; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; transform: translateY(-100%); transition: transform 0.3s ease; }
         #topBar { top: 0; justify-content: space-between; border-bottom: 1px solid #555; }
         #bottomBar { bottom: 0; transform: translateY(100%); justify-content: space-between; border-top: 1px solid #555; }
-        
         .bar.visible { transform: translateY(0); }
-
-        .bar button, .bar select {
-            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
-            color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-right: 8px; font-size: 13px;
-        }
+        .bar button, .bar select { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-right: 8px; font-size: 13px; }
         .bar-info { font-size: 14px; color: #ddd; }
-        .jiggler-active { background: #3a753a !important; border-color: #5cb85c !important; }
 
-        @media (max-width: 768px) {
-            .bar button { padding: 5px 8px; font-size: 11px; margin-right: 3px; }
-            #bottomBar { flex-direction: column; justify-content: center; height: auto; padding: 10px; gap: 5px;}
-        }
+        /* Companion Mode */
+        #companionContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: none; flex-direction: column; color: white; }
+        .comp-header { background: #222; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
+        .comp-header button { background: #c43838; border: none; color: white; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .touchpad { flex-grow: 1; background: #1a1a1a; margin: 15px; border-radius: 10px; border: 2px dashed #333; position: relative; }
+        .touchpad::after { content: "TOUCHPAD"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #333; font-weight: bold; font-size: 24px; pointer-events: none; }
+        .comp-controls { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .comp-row { display: flex; gap: 10px; justify-content: space-between; }
+        .comp-btn { flex: 1; background: #333; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; }
+        .comp-btn:active { background: #555; }
+        
+        .toast { position: fixed; top: 20px; right: -300px; background: rgba(255,255,255,0.9); color: black; padding: 12px 20px; border-radius: 8px; font-weight: bold; transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        .toast.show { right: 20px; }
+        #hiddenInput { position: absolute; top: -1000px; opacity: 0; }
     </style>
 </head>
-<!-- Blockiert das Windows-Kontextmenü auf dem Client -->
 <body oncontextmenu="return false;">
 
     <div id="startPage" class="active aero-container">
         <h1>Willkommen</h1>
         <div class="grid">
-            <a href="https://kleinlauch.github.io/klf" target="_blank" class="aero-btn">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                KLF WEB
-            </a>
-            <a href="https://nc.schillerschuledettingen.de/nextcloud/login" target="_blank" class="aero-btn">
-                <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
-                NextCloud-SSD
-            </a>
-            <a href="https://schillerschuledettingen.webuntis.com/WebUntis/?school=schillerschuledettingen#/basic/login" target="_blank" class="aero-btn">
-                <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
-                Untis
-            </a>
-            <div class="aero-btn" onclick="showPage('remotePage')">
-                <svg viewBox="0 0 24 24"><path d="M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H3V4h18v12z"/></svg>
-                Remote Control
-            </div>
+            <div class="aero-btn" onclick="window.open('https://kleinlauch.github.io/klf','_blank')">KLF WEB</div>
+            <div class="aero-btn" onclick="window.open('https://nc.schillerschuledettingen.de/nextcloud/login','_blank')">NextCloud-SSD</div>
+            <div class="aero-btn" onclick="window.open('https://schillerschuledettingen.webuntis.com/WebUntis/?school=schillerschuledettingen#/basic/login','_blank')">Untis</div>
+            <div class="aero-btn" onclick="showPage('remotePage')">Remote Control</div>
         </div>
     </div>
 
     <div id="remotePage" class="aero-container">
         <h1>Gerät auswählen</h1>
+        <p style="font-size:12px; color:#555;">(Halten für Touchpad-Modus)</p>
         <div class="grid">
-            <div class="aero-btn" onclick="openPinModal('DesktopPC')">DesktopPC</div>
+            <div class="aero-btn" id="pcBtn">DesktopPC</div>
             <div class="aero-btn disabled">HP Laptop</div>
             <div class="aero-btn disabled">Lenovo Notebook</div>
             <div class="aero-btn disabled">DELL Latitude</div>
-        </div>
-        <br>
+        </div><br>
         <button class="aero-btn" style="height: auto; width: 150px; margin: 0 auto;" onclick="showPage('startPage')">Zurück</button>
     </div>
 
     <div id="pinModalOverlay">
         <div class="win7-dialog">
-            <div class="win7-titlebar">
-                <span class="win7-title">Windows-Sicherheit</span>
-                <div class="win7-close" onclick="closePinModal()"></div>
-            </div>
+            <div class="win7-titlebar"><span class="win7-title">Windows-Sicherheit</span><div class="win7-close" onclick="closePinModal()"></div></div>
             <div class="win7-content">
-                <div>Authentifizierung für <b id="targetPcName"></b> erforderlich.</div>
+                <div>Authentifizierung für <b id="targetPcName"></b> erforderlich. <span id="compBadge" style="color:red;font-weight:bold;display:none;">(Companion)</span></div>
                 <input type="password" id="pinInput" class="win7-input" placeholder="PIN">
                 <button id="pinSubmit" class="win7-btn">Verbinden</button>
                 <div id="pinError" style="color:red; margin-top:10px; display:none;">Falsche PIN.</div>
@@ -153,10 +102,19 @@
     </div>
 
     <div id="loadingOverlay">
-        <div class="loader"></div>
-        <div style="margin-bottom:10px;">Verbindungsaufbau...</div>
-        <div class="progress-container"><div id="progressBar" class="progress-bar"></div></div>
-        <button class="cancel-btn" onclick="exitRemote()">Abbrechen</button>
+        <div class="clock-container">
+            <div id="loadingClock" class="flip-clock">00:00:00</div>
+            <div id="loadingDate" class="flip-date">00.00.0000</div>
+        </div>
+        <div class="loading-middle">
+            <div id="cycleText">Verbindung wird aufgebaut</div>
+            <div id="factText"></div>
+        </div>
+        <div class="loading-bottom">
+            <div class="loader"></div>
+            <div class="progress-container"><div id="progressBar" class="progress-bar"></div></div>
+            <button class="cancel-btn" onclick="exitRemote()">Abbrechen</button>
+        </div>
     </div>
 
     <div id="videoContainer">
@@ -175,9 +133,7 @@
                 <button onclick="exitRemote()">Trennen</button>
             </div>
         </div>
-
-        <video id="remoteVideo" autoplay playsinline></video>
-
+        <video id="remoteVideo" autoplay playsinline muted></video>
         <div id="bottomBar" class="bar">
             <div class="bar-info" id="activeHostName">DesktopPC</div>
             <div style="display:flex; gap: 20px;">
@@ -188,6 +144,30 @@
         </div>
     </div>
 
+    <div id="companionContainer">
+        <div class="comp-header">
+            <b>Companion Mode</b>
+            <button onclick="exitRemote()">Trennen</button>
+        </div>
+        <div class="touchpad" id="touchpadArea"></div>
+        <div class="comp-controls">
+            <div class="comp-row">
+                <div class="comp-btn" onclick="sendAction('vol_down')">Vol -</div>
+                <div class="comp-btn" onclick="sendAction('play_pause')">Play/Pause</div>
+                <div class="comp-btn" onclick="sendAction('vol_up')">Vol +</div>
+            </div>
+            <div class="comp-row">
+                <div class="comp-btn" onclick="sendAction('esc')">ESC</div>
+                <div class="comp-btn" onclick="sendAction('f11')">F11</div>
+                <div class="comp-btn" onclick="openKeyboard()">Tastatur</div>
+                <div class="comp-btn" onclick="toggleJiggler()">Wackeln</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Zeiger wackeln aktiv</div>
+    <input type="text" id="hiddenInput" autocapitalize="none" autocomplete="off" spellcheck="false">
+
     <script>
         const TARGET_HASH = "5322cc91aff6372f30d78585e6a14079bd8666560a3328c9bd8d3ae3358325a3b4172d054eda8d4808ab3beea75d7ebbdaaa47b9758259a032bfa4d177637a10";
         const PIESOCKET_API_KEY = "dNUjU3XDvFsQcLKs4BQ3q1Q2opjuDVSW7sqRb5b9";
@@ -196,99 +176,104 @@
 
         let ws, pc, dataChannel;
         let wakeLock = null;
-        let pingInterval;
+        let pingInterval, cycleTextInterval, clockInterval;
         let jigglerActive = false;
+        let isCompanionMode = false;
 
-        function showPage(pageId) {
-            document.querySelectorAll('.aero-container').forEach(el => el.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-        }
+        const cyclePhrases = ["Einen Moment noch", "Gleich ist es soweit", "Verbindung wird aufgebaut", "Daten werden ausgehandelt"];
+        const facts = [
+            "Heute vor 67 Jahren (1959) schlug die sowjetische Raumsonde Lunik 2 als erstes künstliches Objekt auf dem Mond auf.",
+            "Am 14. September 1752 wurde im britischen Empire der gregorianische Kalender eingeführt – dadurch fielen 11 Tage einfach weg.",
+            "Wusstest du? Die STUN-Technologie, die wir gerade nutzen, ermöglicht direkte Verbindungen ohne Portfreigaben im Router."
+        ];
 
-        function openPinModal(pcName) {
+        // Companion Mode Trigger (Hold DesktopPC button)
+        let holdTimer;
+        const pcBtn = document.getElementById('pcBtn');
+        pcBtn.addEventListener('mousedown', () => { holdTimer = setTimeout(()=>{ openPinModal('DesktopPC', true); }, 800); });
+        pcBtn.addEventListener('mouseup', () => { if(holdTimer){ clearTimeout(holdTimer); openPinModal('DesktopPC', false); holdTimer=null;} });
+        pcBtn.addEventListener('touchstart', (e) => { e.preventDefault(); holdTimer = setTimeout(()=>{ openPinModal('DesktopPC', true); }, 800); });
+        pcBtn.addEventListener('touchend', (e) => { e.preventDefault(); if(holdTimer){ clearTimeout(holdTimer); openPinModal('DesktopPC', false); holdTimer=null;} });
+
+        function showPage(pageId) { document.querySelectorAll('.aero-container').forEach(el => el.classList.remove('active')); document.getElementById(pageId).classList.add('active'); }
+        function openPinModal(pcName, companion) {
+            isCompanionMode = companion;
             document.getElementById('targetPcName').innerText = pcName;
             document.getElementById('activeHostName').innerText = pcName;
+            document.getElementById('compBadge').style.display = companion ? 'inline' : 'none';
             document.getElementById('pinModalOverlay').style.display = 'flex';
             document.getElementById('pinInput').focus();
         }
+        function closePinModal() { document.getElementById('pinModalOverlay').style.display = 'none'; document.getElementById('pinInput').value = ''; document.getElementById('pinError').style.display = 'none'; }
 
-        function closePinModal() {
-            document.getElementById('pinModalOverlay').style.display = 'none';
-            document.getElementById('pinInput').value = '';
-            document.getElementById('pinError').style.display = 'none';
-        }
-
-        async function sha512(str) {
-            const buffer = new TextEncoder("utf-8").encode(str);
-            const hashBuffer = await crypto.subtle.digest("SHA-512", buffer);
-            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
+        async function sha512(str) { const buffer = new TextEncoder("utf-8").encode(str); const hashBuffer = await crypto.subtle.digest("SHA-512", buffer); return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join(''); }
 
         document.getElementById('pinSubmit').addEventListener('click', async () => {
-            const hash = await sha512(document.getElementById('pinInput').value);
-            if (hash === TARGET_HASH) {
-                closePinModal();
-                startRemoteSession();
-            } else {
-                document.getElementById('pinError').style.display = 'block';
-                document.getElementById('pinInput').value = '';
-            }
+            if (await sha512(document.getElementById('pinInput').value) === TARGET_HASH) { closePinModal(); startRemoteSession(); } 
+            else { document.getElementById('pinError').style.display = 'block'; document.getElementById('pinInput').value = ''; }
         });
         document.getElementById('pinInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('pinSubmit').click(); });
 
-        async function requestWakeLock() {
-            try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
+        async function requestWakeLock() { try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {} }
+
+        function startLoadingAnimations() {
+            let pIdx = 0;
+            document.getElementById('factText').innerText = facts[Math.floor(Math.random() * facts.length)];
+            cycleTextInterval = setInterval(() => { pIdx = (pIdx + 1) % cyclePhrases.length; document.getElementById('cycleText').innerText = cyclePhrases[pIdx]; }, 3000);
+            let prog = 0;
+            document.getElementById('progressBar').style.width = '0%';
+            window.simProgress = setInterval(() => {
+                if(prog < 85) { prog += Math.random() * 5; document.getElementById('progressBar').style.width = prog + '%'; }
+            }, 300);
+            clockInterval = setInterval(updateClock, 1000); updateClock();
         }
+
+        function stopLoadingAnimations() { clearInterval(cycleTextInterval); clearInterval(window.simProgress); }
 
         function startRemoteSession() {
             document.querySelectorAll('.aero-container').forEach(el => el.classList.remove('active'));
             document.getElementById('loadingOverlay').style.display = 'flex';
+            startLoadingAnimations();
             
-            let prog = 0;
-            const progInt = setInterval(() => {
-                prog += 15;
-                if(prog > 90) clearInterval(progInt);
-                document.getElementById('progressBar').style.width = prog + '%';
-            }, 200);
-
-            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
+            if (!isCompanionMode && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
             requestWakeLock();
             initConnection();
         }
 
         function exitRemote() {
-            if (ws) ws.close();
-            if (pc) pc.close();
+            if (ws) ws.close(); if (pc) pc.close();
             if (pingInterval) clearInterval(pingInterval);
             if (wakeLock) wakeLock.release();
+            stopLoadingAnimations(); clearInterval(clockInterval);
             if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
             
             document.getElementById('videoContainer').style.display = 'none';
+            document.getElementById('companionContainer').style.display = 'none';
             document.getElementById('loadingOverlay').style.display = 'none';
-            document.getElementById('progressBar').style.width = '0%';
-            document.getElementById('topBar').classList.remove('visible');
-            document.getElementById('bottomBar').classList.remove('visible');
+            document.getElementById('topBar').classList.remove('visible'); document.getElementById('bottomBar').classList.remove('visible');
             showPage('startPage');
         }
 
         function initConnection() {
             ws = new WebSocket(SIGNALING_URL);
-
             ws.onopen = async () => {
                 pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-                pc.addTransceiver('video', { direction: 'recvonly' });
-                pc.addTransceiver('audio', { direction: 'recvonly' });
+                pc.addTransceiver('video', { direction: 'recvonly' }); pc.addTransceiver('audio', { direction: 'recvonly' });
 
                 dataChannel = pc.createDataChannel('control');
-                dataChannel.onopen = () => {
-                    pingInterval = setInterval(() => {
-                        if (dataChannel.readyState === 'open') dataChannel.send(JSON.stringify({ type: 'ping', ts: Date.now() }));
-                    }, 2000);
+                dataChannel.onopen = () => { 
+                    pingInterval = setInterval(() => { if (dataChannel.readyState === 'open') dataChannel.send(JSON.stringify({ type: 'ping', ts: Date.now() })); }, 2000);
+                    // Im Companion Mode reicht der DataChannel. Video-Track abwarten ist nicht zwingend nötig.
+                    if (isCompanionMode) {
+                        document.getElementById('progressBar').style.width = '100%';
+                        setTimeout(() => {
+                            stopLoadingAnimations();
+                            document.getElementById('loadingOverlay').style.display = 'none';
+                            document.getElementById('companionContainer').style.display = 'flex';
+                        }, 500);
+                    }
                 };
-                
-                dataChannel.onmessage = (e) => {
-                    const data = JSON.parse(e.data);
-                    if (data.type === 'pong') document.getElementById('pingDisplay').innerText = `Latenz: ${Date.now() - data.ts} ms`;
-                };
+                dataChannel.onmessage = (e) => { const data = JSON.parse(e.data); if (data.type === 'pong') document.getElementById('pingDisplay').innerText = `Latenz: ${Date.now() - data.ts} ms`; };
 
                 setupInputEvents();
 
@@ -296,27 +281,23 @@
                     const video = document.getElementById('remoteVideo');
                     if (video.srcObject !== event.streams[0]) {
                         video.srcObject = event.streams[0];
-                        video.muted = false; // Audio explizit aktivieren
-                        video.volume = 1.0;
                         
-                        setTimeout(() => {
+                        if (!isCompanionMode) {
                             document.getElementById('progressBar').style.width = '100%';
                             setTimeout(() => {
+                                stopLoadingAnimations();
                                 document.getElementById('loadingOverlay').style.display = 'none';
                                 document.getElementById('videoContainer').style.display = 'flex';
-                                setInterval(updateClock, 1000); updateClock();
-                            }, 300);
-                        }, 500);
+                                video.muted = false;
+                                video.play().catch(()=>{});
+                            }, 500);
+                        }
                     }
                 };
-
                 pc.onicecandidate = (e) => { if (e.candidate) ws.send(JSON.stringify({ ice: e.candidate })); };
-
-                const offer = await pc.createOffer();
-                await pc.setLocalDescription(offer);
+                const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
                 ws.send(JSON.stringify({ sdp: pc.localDescription.sdp, type: pc.localDescription.type }));
             };
-
             ws.onmessage = async (e) => {
                 const data = JSON.parse(e.data);
                 if (data.sdp) await pc.setRemoteDescription(new RTCSessionDescription(data));
@@ -324,144 +305,149 @@
             };
         }
 
-        const video = document.getElementById('remoteVideo');
-        
-        function isMenuOpen() {
-            return document.getElementById('topBar').classList.contains('visible');
-        }
+        function isMenuOpen() { return document.getElementById('topBar').classList.contains('visible'); }
+        function sendAction(action) { if (dataChannel && dataChannel.readyState === 'open') dataChannel.send(JSON.stringify({ type: action })); }
 
-        function setupInputEvents() {
-            // Maus PC
-            video.addEventListener('mousemove', (e) => {
-                if(jigglerActive) { jigglerActive = false; document.getElementById('jigglerBtn').classList.remove('jiggler-active'); }
-                if (dataChannel && dataChannel.readyState === 'open' && !isMenuOpen()) {
-                    const rect = video.getBoundingClientRect();
-                    const x = (e.clientX - rect.left) / rect.width;
-                    const y = (e.clientY - rect.top) / rect.height;
-                    dataChannel.send(JSON.stringify({ type: 'mousemove', x: x, y: y }));
-                }
-            });
-
-            video.addEventListener('mousedown', (e) => {
-                if (dataChannel && dataChannel.readyState === 'open' && !isMenuOpen()) {
-                    dataChannel.send(JSON.stringify({ type: 'click', button: e.button }));
-                }
-            });
-
-            // Tastatur (Blockiert Browser-Shortcuts im Remote-Modus)
-            document.addEventListener('keydown', (e) => {
-                if (document.getElementById('videoContainer').style.display === 'flex' && !isMenuOpen()) {
-                    e.preventDefault();
-                    if (dataChannel && dataChannel.readyState === 'open') dataChannel.send(JSON.stringify({ type: 'keydown', key: e.key }));
-                }
-            });
-
-            document.addEventListener('keyup', (e) => {
-                if (document.getElementById('videoContainer').style.display === 'flex' && !isMenuOpen()) {
-                    e.preventDefault();
-                    if (dataChannel && dataChannel.readyState === 'open') dataChannel.send(JSON.stringify({ type: 'keyup', key: e.key }));
-                }
-            });
-
-            // Mobile Touchpad Steuerung
-            let lastX = 0, lastY = 0;
-            let longPressTimer = null;
-            let threeFingerTimer = null;
-
-            video.addEventListener('touchstart', (e) => {
-                e.preventDefault(); // Verhindert Zoomen
+        // Touchpad Logik (wird fuer Video und Companion genutzt)
+        function bindTouchpad(element, sendRelative) {
+            let lastX = 0, lastY = 0, longPressTimer = null, threeFingerTimer = null;
+            element.addEventListener('touchstart', (e) => {
+                e.preventDefault();
                 if(e.touches.length === 1) {
-                    lastX = e.touches[0].clientX;
-                    lastY = e.touches[0].clientY;
-                    longPressTimer = setTimeout(() => {
-                        if(dataChannel) dataChannel.send(JSON.stringify({ type: 'click', button: 2 })); // Rechtsklick
-                        longPressTimer = null;
-                    }, 600);
-                } else if(e.touches.length === 3) {
-                    threeFingerTimer = setTimeout(() => {
-                        document.getElementById('topBar').classList.add('visible');
-                        document.getElementById('bottomBar').classList.add('visible');
-                    }, 2000);
+                    lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+                    longPressTimer = setTimeout(() => { if(dataChannel && !isMenuOpen()) dataChannel.send(JSON.stringify({ type: 'click', button: 2 })); longPressTimer = null; }, 600);
+                } else if(e.touches.length === 3 && !isCompanionMode) {
+                    threeFingerTimer = setTimeout(() => { document.getElementById('topBar').classList.add('visible'); document.getElementById('bottomBar').classList.add('visible'); }, 2000);
                 }
             }, {passive: false});
 
-            video.addEventListener('touchmove', (e) => {
+            element.addEventListener('touchmove', (e) => {
                 e.preventDefault();
                 if(longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
                 if(threeFingerTimer) { clearTimeout(threeFingerTimer); threeFingerTimer = null; }
-
+                
                 if (e.touches.length === 1 && !isMenuOpen()) {
-                    let dx = (e.touches[0].clientX - lastX) * 1.5; // Leicht beschleunigt
-                    let dy = (e.touches[0].clientY - lastY) * 1.5;
-                    if(dataChannel) dataChannel.send(JSON.stringify({ type: 'rel_mousemove', dx: dx, dy: dy }));
-                    lastX = e.touches[0].clientX;
-                    lastY = e.touches[0].clientY;
+                    if (sendRelative) {
+                        let dx = (e.touches[0].clientX - lastX) * 1.5, dy = (e.touches[0].clientY - lastY) * 1.5;
+                        if(dataChannel) dataChannel.send(JSON.stringify({ type: 'rel_mousemove', dx: dx, dy: dy }));
+                        lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+                    } else {
+                        const rect = element.getBoundingClientRect();
+                        dataChannel.send(JSON.stringify({ type: 'mousemove', x: (e.touches[0].clientX - rect.left) / rect.width, y: (e.touches[0].clientY - rect.top) / rect.height }));
+                    }
                 } else if(e.touches.length === 2 && !isMenuOpen()) {
-                    let dy = e.touches[0].clientY - lastY; // Scrollen
-                    if(dataChannel) dataChannel.send(JSON.stringify({ type: 'scroll', dx: 0, dy: dy > 0 ? 1 : -1 }));
+                    let dy = e.touches[0].clientY - lastY;
+                    // Negative delta for natural scrolling mapping
+                    if(dataChannel) dataChannel.send(JSON.stringify({ type: 'scroll', dx: 0, dy: dy > 0 ? -1 : 1 }));
                     lastY = e.touches[0].clientY;
                 }
             }, {passive: false});
 
-            video.addEventListener('touchend', (e) => {
+            element.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 if(longPressTimer) {
                     clearTimeout(longPressTimer);
-                    // War ein kurzer Tap -> Linksklick
-                    if(e.changedTouches.length === 1 && dataChannel && !isMenuOpen()) {
-                        dataChannel.send(JSON.stringify({ type: 'click', button: 0 }));
-                    }
+                    if(e.changedTouches.length === 1 && dataChannel && !isMenuOpen()) dataChannel.send(JSON.stringify({ type: 'click', button: 0 }));
                 }
                 if(threeFingerTimer) clearTimeout(threeFingerTimer);
             });
         }
 
-        // Leiste am PC öffnen
+        function setupInputEvents() {
+            const video = document.getElementById('remoteVideo');
+            
+            // Video Maus Event
+            video.addEventListener('mousemove', (e) => {
+                if (dataChannel && dataChannel.readyState === 'open' && !isMenuOpen()) {
+                    const rect = video.getBoundingClientRect();
+                    dataChannel.send(JSON.stringify({ type: 'mousemove', x: (e.clientX - rect.left) / rect.width, y: (e.clientY - rect.top) / rect.height }));
+                }
+            });
+            video.addEventListener('mousedown', (e) => { if (dataChannel && dataChannel.readyState === 'open' && !isMenuOpen()) dataChannel.send(JSON.stringify({ type: 'click', button: e.button })); });
+            
+            // PC Scrollen (versteckt per CSS overflow:hidden am body)
+            window.addEventListener('wheel', (e) => {
+                if ((document.getElementById('videoContainer').style.display === 'flex' || isCompanionMode) && !isMenuOpen()) {
+                    e.preventDefault();
+                    if (dataChannel && dataChannel.readyState === 'open') {
+                        // Teilen für sanfteres Scrollen
+                        dataChannel.send(JSON.stringify({ type: 'scroll', dx: e.deltaX / 50, dy: - (e.deltaY / 50) }));
+                    }
+                }
+            }, { passive: false });
+
+            // Keyboard Events
+            document.addEventListener('keydown', (e) => {
+                if ((document.getElementById('videoContainer').style.display === 'flex' || isCompanionMode) && !isMenuOpen()) {
+                    if(e.target.id !== 'hiddenInput') e.preventDefault(); 
+                    if (dataChannel && dataChannel.readyState === 'open') dataChannel.send(JSON.stringify({ type: 'keydown', key: e.key }));
+                }
+            });
+            document.addEventListener('keyup', (e) => {
+                if ((document.getElementById('videoContainer').style.display === 'flex' || isCompanionMode) && !isMenuOpen()) {
+                    if(e.target.id !== 'hiddenInput') e.preventDefault();
+                    if (dataChannel && dataChannel.readyState === 'open') dataChannel.send(JSON.stringify({ type: 'keyup', key: e.key }));
+                }
+            });
+
+            bindTouchpad(video, true);
+            bindTouchpad(document.getElementById('touchpadArea'), true);
+        }
+
+        // Companion Keyboard Hack
+        const hiddenInp = document.getElementById('hiddenInput');
+        function openKeyboard() { hiddenInp.value = " "; hiddenInp.focus(); }
+        hiddenInp.addEventListener('input', (e) => {
+            if (hiddenInp.value.length < 1) { 
+                if (dataChannel) dataChannel.send(JSON.stringify({ type: 'keydown', key: 'Backspace' }));
+                hiddenInp.value = " "; 
+            } else {
+                const char = hiddenInp.value.charAt(hiddenInp.value.length - 1);
+                if (dataChannel) dataChannel.send(JSON.stringify({ type: 'keydown', key: char }));
+                hiddenInp.value = " ";
+            }
+        });
+
+        // Topbar Hover PC
         document.addEventListener('mousemove', (e) => {
             if (document.getElementById('videoContainer').style.display === 'flex' && !isMenuOpen()) {
                 if (e.clientX > window.innerWidth - 80 && e.clientY > window.innerHeight - 80) {
-                    document.getElementById('topBar').classList.add('visible');
-                    document.getElementById('bottomBar').classList.add('visible');
+                    document.getElementById('topBar').classList.add('visible'); document.getElementById('bottomBar').classList.add('visible');
                 }
             }
         });
 
-        function backToStream() {
-            document.getElementById('topBar').classList.remove('visible');
-            document.getElementById('bottomBar').classList.remove('visible');
-        }
-
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
-            else if (document.exitFullscreen) document.exitFullscreen();
-        }
-
-        function sendAction(action) {
-            if (dataChannel && dataChannel.readyState === 'open') dataChannel.send(JSON.stringify({ type: action }));
+        function backToStream() { document.getElementById('topBar').classList.remove('visible'); document.getElementById('bottomBar').classList.remove('visible'); }
+        function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else if (document.exitFullscreen) document.exitFullscreen(); }
+        
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
 
         function toggleJiggler() {
             jigglerActive = !jigglerActive;
-            const btn = document.getElementById('jigglerBtn');
-            if (jigglerActive) {
-                btn.classList.add('jiggler-active');
-                backToStream(); // Zurück zum Vollbild wie gewünscht
+            if(!isCompanionMode) {
+                const btn = document.getElementById('jigglerBtn');
+                if (jigglerActive) { btn.classList.add('jiggler-active'); backToStream(); } else { btn.classList.remove('jiggler-active'); }
             } else {
-                btn.classList.remove('jiggler-active');
+                showToast(jigglerActive ? "Zeiger wackeln: AN" : "Zeiger wackeln: AUS");
             }
             if (dataChannel && dataChannel.readyState === 'open') dataChannel.send(JSON.stringify({ type: 'jiggler', active: jigglerActive }));
         }
-        
-        function changeQuality() {
-            if (dataChannel && dataChannel.readyState === 'open') {
-                dataChannel.send(JSON.stringify({ type: 'quality', value: parseFloat(document.getElementById('qualitySelect').value) }));
-            }
-        }
+        function changeQuality() { if (dataChannel && dataChannel.readyState === 'open') dataChannel.send(JSON.stringify({ type: 'quality', value: parseFloat(document.getElementById('qualitySelect').value) })); }
 
         function updateClock() {
             const now = new Date();
-            document.getElementById('timeDisplay').innerText = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('dateDisplay').innerText = String(now.getDate()).padStart(2, '0') + '.' + String(now.getMonth()+1).padStart(2, '0') + '.' + now.getFullYear();
+            const timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+            const dateStr = String(now.getDate()).padStart(2, '0') + '.' + String(now.getMonth()+1).padStart(2, '0') + '.' + now.getFullYear();
+            if (document.getElementById('loadingOverlay').style.display !== 'none') {
+                document.getElementById('loadingClock').innerText = timeStr; document.getElementById('loadingDate').innerText = dateStr;
+            } else {
+                document.getElementById('timeDisplay').innerText = timeStr; document.getElementById('dateDisplay').innerText = dateStr;
+            }
         }
     </script>
 </body>
