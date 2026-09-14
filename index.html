@@ -49,7 +49,7 @@
     </div>
 
     <script>
-        // Ersetze dies mit deinem API Key von piesocket.com
+        // Dein eingetragener PieSocket API Key
         const PIESOCKET_API_KEY = "dNUjU3XDvFsQcLKs4BQ3q1Q2opjuDVSW7sqRb5b9";
         const CLUSTER_ID = "free.blr2"; 
         const SIGNALING_URL = `wss://${CLUSTER_ID}.piesocket.com/v3/1?api_key=${PIESOCKET_API_KEY}&notify_self=0`;
@@ -75,7 +75,7 @@
                     iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
                 });
 
-                // Fehlerbehebung: Explizit nach einem Video-Track fragen, bevor das Offer erstellt wird
+                // Explizit nach einem Video-Track fragen
                 pc.addTransceiver('video', { direction: 'recvonly' });
 
                 // DataChannel fuer Maus und Tastatur erstellen
