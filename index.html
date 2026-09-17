@@ -10,9 +10,6 @@
         .aero-container { background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 0 10px rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); padding: 40px; text-align: center; width: 90%; max-width: 800px; }
         h1 { color: #0d4b75; text-shadow: 1px 1px 3px rgba(255,255,255,0.8); margin-bottom: 30px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; }
-        .device-card { display: flex; flex-direction: column; gap: 8px; }
-        .device-card .aero-btn { width: 100%; box-sizing: border-box; }
-        .power-btn { height: auto !important; min-height: 50px; padding: 10px 15px; font-size: 14px; }
         .aero-btn { background: linear-gradient(to bottom, rgba(255,255,255,0.9) 0%, rgba(220,235,250,0.8) 50%, rgba(190,215,240,0.8) 51%, rgba(200,225,245,0.9) 100%); border: 1px solid #8ca6c2; border-radius: 10px; padding: 15px; cursor: pointer; text-decoration: none; color: #1a4a6b; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.9); transition: all 0.2s; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100px; user-select: none; }
         .aero-btn:hover:not(.disabled) { transform: translateY(-2px); border-color: #5a8ab8; }
         .aero-btn.disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(100%); }
@@ -84,12 +81,9 @@
         <h1>Gerät auswählen</h1>
         <p style="font-size:12px; color:#555;">(Halten für Touchpad-Modus)</p>
         <div class="grid">
-            <div class="device-card">
-                <div style="display:flex; flex-direction:column; gap:10px;">
+            <div>
                 <div class="aero-btn" id="pcBtn">DesktopPC</div>
-                <button class="win7-btn" style="width:180px; margin:0 auto;" onclick="openWakePinModal()">Einschalten</button>
-            </div>
-                <div class="aero-btn power-btn" onclick="openPinModal('DesktopPC', false, 'wake')">Einschalten</div>
+                <button class="win7-btn" style="width:180px; margin:10px auto 0;" onclick="openWakePinModal()">Einschalten</button>
             </div>
             <div class="aero-btn disabled">HP Laptop</div>
             <div class="aero-btn disabled">Lenovo Notebook</div>
@@ -180,7 +174,10 @@
     <script>
         const TARGET_HASH = "5322cc91aff6372f30d78585e6a14079bd8666560a3328c9bd8d3ae3358325a3b4172d054eda8d4808ab3beea75d7ebbdaaa47b9758259a032bfa4d177637a10";
         const PIESOCKET_API_KEY = "dNUjU3XDvFsQcLKs4BQ3q1Q2opjuDVSW7sqRb5b9";
-        const CLUSTER_ID = "free.blr2"; 
+        const CLUSTER_ID = "free.blr2";
+        const GITHUB_TOKEN = "HIER_DEIN_GITHUB_API_KEY_EINTRAGEN";
+        const GIST_ID = "c0fb35fa90f38d0acb5d29bbb9e4fca7";
+        const GIST_FILENAME = "command.txt"; 
         const SIGNALING_URL = `wss://${CLUSTER_ID}.piesocket.com/v3/1?api_key=${PIESOCKET_API_KEY}&notify_self=0`;
 
         let ws, pc, dataChannel;
@@ -188,16 +185,7 @@
         let pingInterval, cycleTextInterval, clockInterval;
         let jigglerActive = false;
         let isCompanionMode = false;
-        let pinAction = 'remote';
-
-        // GitHub Gist Einstellungen
-        // Hier NUR deinen GitHub Personal Access Token eintragen.
-        // Der Token braucht Berechtigung zum Bearbeiten von Gists.
-        const GITHUB_TOKEN = "HIER_DEIN_GITHUB_API_KEY_EINTRAGEN";
-        const GIST_ID = "c0fb35fa90f38d0acb5d29bbb9e4fca7";
-        const GIST_FILENAME = "command.txt";
-        const GIST_ID = "c0fb35fa90f38d0acb5d29bbb9e4fca7";
-        const GIST_FILENAME = "command.txt";
+        let wakePinMode = false;
 
         const cyclePhrases = ["Einen Moment noch", "Gleich ist es soweit", "Verbindung wird aufgebaut", "Daten werden ausgehandelt"];
         const facts = [
@@ -215,97 +203,79 @@
         pcBtn.addEventListener('touchend', (e) => { e.preventDefault(); if(holdTimer){ clearTimeout(holdTimer); openPinModal('DesktopPC', false); holdTimer=null;} });
 
         function showPage(pageId) { document.querySelectorAll('.aero-container').forEach(el => el.classList.remove('active')); document.getElementById(pageId).classList.add('active'); }
-        function openPinModal(pcName, companion, action = 'remote') {
+        function openPinModal(pcName, companion) {
             isCompanionMode = companion;
-            pinAction = action;
             document.getElementById('targetPcName').innerText = pcName;
             document.getElementById('activeHostName').innerText = pcName;
             document.getElementById('compBadge').style.display = companion ? 'inline' : 'none';
             document.getElementById('pinModalOverlay').style.display = 'flex';
             document.getElementById('pinInput').focus();
         }
-        let wakePinMode = false;
-
         function openWakePinModal() {
             wakePinMode = true;
             document.getElementById('targetPcName').innerText = 'DesktopPC einschalten';
-            document.getElementById('activeHostName').innerText = 'DesktopPC';
             document.getElementById('compBadge').style.display = 'none';
-            document.getElementById('pinModalOverlay').style.display = 'flex';
             document.getElementById('pinInput').value = '';
             document.getElementById('pinError').style.display = 'none';
+            document.getElementById('pinModalOverlay').style.display = 'flex';
             document.getElementById('pinInput').focus();
         }
 
         function closePinModal() { wakePinMode = false; document.getElementById('pinModalOverlay').style.display = 'none'; document.getElementById('pinInput').value = ''; document.getElementById('pinError').style.display = 'none'; }
 
-        async function sha512(str) { const buffer = new TextEncoder("utf-8").encode(str); const hashBuffer = await crypto.subtle.digest("SHA-512", buffer); return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join(''); }
-
-        document.getElementById('pinSubmit').addEventListener('click', async () => {
-            if (await sha512(document.getElementById('pinInput').value) === TARGET_HASH) {
-                closePinModal();
-
-                if (pinAction === 'wake') {
-                    sendWakeCommand();
-                } else {
-                    startRemoteSession();
-                }
-            } 
-            else {
-                document.getElementById('pinError').style.display = 'block';
-                document.getElementById('pinInput').value = '';
-            }
-        });
-
-        async function sendWakeCommand() {
-            if (!GITHUB_TOKEN || GITHUB_TOKEN === "HIER_DEIN_GITHUB_API_KEY_EINTRAGEN") {
-                showToast("GitHub API Key fehlt");
-                return;
-            }
-
+                async function sendWakeCommand() {
             const now = new Date();
             const timeStr =
                 String(now.getHours()).padStart(2, '0') + ':' +
                 String(now.getMinutes()).padStart(2, '0') + ':' +
                 String(now.getSeconds()).padStart(2, '0');
 
-            const command = `${timeStr};WAKE`;
-
-            try {
-                const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Accept': 'application/vnd.github+json',
-                        'Authorization': `Bearer ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        files: {
-                            [GIST_FILENAME]: {
-                                content: command
-                            }
+            const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                method: 'PATCH',
+                headers: {
+                    'Accept': 'application/vnd.github+json',
+                    'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                    'X-GitHub-Api-Version': '2022-11-28',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    files: {
+                        [GIST_FILENAME]: {
+                            content: `${timeStr};WAKE`
                         }
-                    })
-                });
+                    }
+                })
+            });
 
-                if (!response.ok) {
-                    let errorText = '';
-                    try {
-                        const errorData = await response.json();
-                        errorText = errorData.message || '';
-                    } catch (e) {}
-
-                    console.error('GitHub Gist Fehler:', response.status, errorText);
-                    showToast(`Einschalten fehlgeschlagen (${response.status})`);
-                    return;
-                }
-
-                showToast(`WAKE gesendet: ${command}`);
-            } catch (error) {
-                console.error('Gist-Fehler:', error);
-                showToast("Keine Verbindung zu GitHub");
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
             }
+
+            showToast('DesktopPC wird eingeschaltet');
         }
+
+        async function sha512(str) { const buffer = new TextEncoder("utf-8").encode(str); const hashBuffer = await crypto.subtle.digest("SHA-512", buffer); return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join(''); }
+
+        document.getElementById('pinSubmit').addEventListener('click', async () => {
+            if (await sha512(document.getElementById('pinInput').value) === TARGET_HASH) {
+                const wasWakePin = wakePinMode;
+                closePinModal();
+
+                if (wasWakePin) {
+                    try {
+                        await sendWakeCommand();
+                    } catch (error) {
+                        console.error('Wake Gist Fehler:', error);
+                        showToast(`Einschalten fehlgeschlagen: ${error.message}`);
+                    }
+                } else {
+                    startRemoteSession();
+                }
+            } else {
+                document.getElementById('pinError').style.display = 'block';
+                document.getElementById('pinInput').value = '';
+            }
+        });
         document.getElementById('pinInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('pinSubmit').click(); });
 
         async function requestWakeLock() { try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {} }
